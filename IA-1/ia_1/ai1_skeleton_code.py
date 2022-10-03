@@ -2,6 +2,11 @@
 # AI1 skeleton code
 # By Quintin Pope
 
+import numpy
+import pandas
+import matplotlib
+
+current_year = 2022
 
 # Loads a data file from a provided file location.
 def load_data(path):
