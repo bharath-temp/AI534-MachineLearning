@@ -32,8 +32,24 @@ def preprocess_data(data, normalize, drop_sqrt_living15):
     #print(df)
     #return preprocessed_data
     data[["month", "day", "year"]] = data["date"].str.split("/", expand=True)
-    data.drop(columns=['id', 'date'])
-    return data
+    preprocessed_data = pd.DataFrame(data).to_numpy()
+    #print(preprocessed_data)
+    # Delete the column of house ID, and the column of date
+    preprocessed_data = np.delete(preprocessed_data, [0,1], 1)
+    
+    # Add a constant "1" column
+    numRow = np.shape(preprocessed_data)[0]
+    preprocessed_data = np.c_[preprocessed_data, np.ones(numRow)]
+    #  yr renovated to "age since built"
+    for index in range(numRow):
+        if preprocessed_data[index][12] == 0:
+            preprocessed_data[index][12] = current_year - preprocessed_data[index][11]
+        else:
+            preprocessed_data[index][12] = current_year - preprocessed_data[index][12] 
+        print(preprocessed_data[index][12])
+    return preprocessed_data
+
+
 
 # Implements the feature engineering required for part 4. Quite similar to preprocess_data.
 # Expand the arguments of this function however you like to control which feature modification
