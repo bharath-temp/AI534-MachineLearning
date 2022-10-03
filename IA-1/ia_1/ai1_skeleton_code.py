@@ -3,7 +3,7 @@
 # By Quintin Pope
 
 import numpy as np
-import pandas
+import pandas as pd
 import matplotlib
 
 current_year = 2022
@@ -11,8 +11,10 @@ current_year = 2022
 # Loads a data file from a provided file location.
 def load_data(path):
     # Your code here:
-    loaded_data = np.genfromtxt(path, delimiter=',')
-    return loaded_data
+    #loaded_data = np.genfromtxt(path, delimiter=',')
+    df_from_csv = pd.read_csv(path)
+    print(df_from_csv)
+    return df_from_csv
 
 # Implements dataset preprocessing, with boolean options to either normalize the data or not, 
 # and to either drop the sqrt_living15 column or not.
@@ -21,11 +23,17 @@ def load_data(path):
 # / aren't normalized, or versions that have / lack sqrt_living15.
 def preprocess_data(data, normalize, drop_sqrt_living15):
     # Your code here:
-    # Delete the first column of house ID
-    preprocessed_data = np.delete(data, 0, 1)
-    # Delete the first row
-    preprocessed_data = np.delete(data, 0, 0)
-    return preprocessed_data
+    # (1) Delete the first column of house ID
+    #preprocessed_data = np.delete(data, 0, 1)
+    # (2) Delete the first row
+    #preprocessed_data = np.delete(data, 0, 0)
+    # (3) spit date
+    #df = pd.DataFrame(preprocessed_data)
+    #print(df)
+    #return preprocessed_data
+    data[["month", "day", "year"]] = data["date"].str.split("/", expand=True)
+    data.drop(columns=['id', 'date'])
+    return data
 
 # Implements the feature engineering required for part 4. Quite similar to preprocess_data.
 # Expand the arguments of this function however you like to control which feature modification
