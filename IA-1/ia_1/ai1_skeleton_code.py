@@ -2,7 +2,7 @@
 # AI1 skeleton code
 # By Quintin Pope
 
-import numpy
+import numpy as np
 import pandas
 import matplotlib
 
@@ -11,7 +11,7 @@ current_year = 2022
 # Loads a data file from a provided file location.
 def load_data(path):
     # Your code here:
-    
+    loaded_data = np.genfromtxt(path, delimiter=',')
     return loaded_data
 
 # Implements dataset preprocessing, with boolean options to either normalize the data or not, 
@@ -21,7 +21,10 @@ def load_data(path):
 # / aren't normalized, or versions that have / lack sqrt_living15.
 def preprocess_data(data, normalize, drop_sqrt_living15):
     # Your code here:
-
+    # Delete the first column of house ID
+    preprocessed_data = np.delete(data, 0, 1)
+    # Delete the first row
+    preprocessed_data = np.delete(data, 0, 0)
     return preprocessed_data
 
 # Implements the feature engineering required for part 4. Quite similar to preprocess_data.
@@ -51,7 +54,7 @@ def plot_losses(losses):
 
 # Part 0  : Data preprocessing.
 # Your code here:
-
+print(preprocess_data(load_data('IA1_train.csv'), 1, 1))
 
 # Part 1 . Implement batch gradient descent and experiment with different learning rates.
 # Your code here:
