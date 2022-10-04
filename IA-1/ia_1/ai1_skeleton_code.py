@@ -2,11 +2,12 @@
 # AI1 skeleton code
 # By Quintin Pope
 
+from ast import Num
 import numpy as np
 import pandas as pd
 import matplotlib
 
-current_year = 2022
+
 
 # Loads a data file from a provided file location.
 def load_data(path):
@@ -32,6 +33,9 @@ def preprocess_data(data, normalize, drop_sqrt_living15):
     #print(df)
     #return preprocessed_data
     data[["month", "day", "year"]] = data["date"].str.split("/", expand=True)
+    data['year'] = data['year'].astype(int)
+    data['month'] = data['month'].astype(int)
+    data['day'] = data['day'].astype(int)
     preprocessed_data = pd.DataFrame(data).to_numpy()
     #print(preprocessed_data)
     # Delete the column of house ID, and the column of date
@@ -43,14 +47,13 @@ def preprocess_data(data, normalize, drop_sqrt_living15):
     #  yr renovated to "age since built"
     for index in range(numRow):
         if preprocessed_data[index][12] == 0:
-            preprocessed_data[index][12] = current_year - preprocessed_data[index][11]
+            preprocessed_data[index][12] = preprocessed_data[index][-2] - preprocessed_data[index][11]
         else:
-            preprocessed_data[index][12] = current_year - preprocessed_data[index][12] 
+            preprocessed_data[index][12] = preprocessed_data[index][-2] - preprocessed_data[index][12] 
     # remove redundant livingsqft if being asked
     if drop_sqrt_living15 == 1:
         preprocessed_data = np.delete(preprocessed_data, 16, 1)
-    for index in range(numRow):
-        print(preprocessed_data[index][16])
+        
     return preprocessed_data
 
 
@@ -69,7 +72,22 @@ def modify_features(data):
 # losses should store the sequence of MSE losses for each epoch of training, which you will then plot.
 def gd_train(data, labels, lr):
     # Your code here:
-
+    # Number of features = number of columns from pre-processed data - 1 : this is because data contains one column of label
+    NumFeat = np.shape(data)[1] - 1
+    # Number of training data = number of rows from pre-processed data \
+    NumTraning = np.shape(data)[0] 
+    # Initialize weights to all zero 
+    weights = np.zeros(NumFeat)
+    # this array stores the loss after each iteration
+    losses = []
+    #we are supposed to run 4000 iterations if the loss is not convereged 
+    count = 4000
+    # this record loss for the current iteration
+    currLoss = 1
+    # termination conditions
+    while count > 0 and currLoss > 1:
+        # TODO: calculate current loss and gradient
+        count -= 1
     return weights, losses
 
 # Generates and saves plots of the training loss curves. Note that you can interpret losses as a matrix
