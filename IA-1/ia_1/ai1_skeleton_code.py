@@ -46,8 +46,13 @@ def preprocess_data(data, normalize, drop_sqrt_living15):
             preprocessed_data[index][12] = current_year - preprocessed_data[index][11]
         else:
             preprocessed_data[index][12] = current_year - preprocessed_data[index][12] 
-        print(preprocessed_data[index][12])
+    # remove redundant livingsqft if being asked
+    if drop_sqrt_living15 == 1:
+        preprocessed_data = np.delete(preprocessed_data, 16, 1)
+    for index in range(numRow):
+        print(preprocessed_data[index][16])
     return preprocessed_data
+
 
 
 
@@ -78,7 +83,7 @@ def plot_losses(losses):
 
 # Part 0  : Data preprocessing.
 # Your code here:
-print(preprocess_data(load_data('IA1_train.csv'), 1, 1))
+print(preprocess_data(load_data('IA1_train.csv'), 1, 0))
 
 # Part 1 . Implement batch gradient descent and experiment with different learning rates.
 # Your code here:
