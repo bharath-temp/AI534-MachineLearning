@@ -24,20 +24,13 @@ def load_data(path):
 # / aren't normalized, or versions that have / lack sqrt_living15.
 def preprocess_data(data, normalize, drop_sqrt_living15):
     # Your code here:
-    # (1) Delete the first column of house ID
-    #preprocessed_data = np.delete(data, 0, 1)
-    # (2) Delete the first row
-    #preprocessed_data = np.delete(data, 0, 0)
-    # (3) spit date
-    #df = pd.DataFrame(preprocessed_data)
-    #print(df)
-    #return preprocessed_data
+    # Split date to YYMMDD
     data[["month", "day", "year"]] = data["date"].str.split("/", expand=True)
     data['year'] = data['year'].astype(int)
     data['month'] = data['month'].astype(int)
     data['day'] = data['day'].astype(int)
+    #print(pd.DataFrame(data))
     preprocessed_data = pd.DataFrame(data).to_numpy()
-    #print(preprocessed_data)
     # Delete the column of house ID, and the column of date
     preprocessed_data = np.delete(preprocessed_data, [0,1], 1)
     
@@ -53,7 +46,17 @@ def preprocess_data(data, normalize, drop_sqrt_living15):
     # remove redundant livingsqft if being asked
     if drop_sqrt_living15 == 1:
         preprocessed_data = np.delete(preprocessed_data, 16, 1)
-        
+    # Calculate mean value by col
+    meanVal = np.mean(preprocessed_data, dtype=np.float64, axis=0)
+    # Calculate std value by col
+    stdVal = np.std(preprocessed_data, dtype=np.float64, axis=0)
+    # Normalize each column by substracting to mean before diving by std
+    for col in range(23):
+        # Do not implement norm on waterfront, price, and constant 1
+        if col != 5 and col != 18 and col!= 22:
+            preprocessed_data[:,col] -= meanVal[col]
+            preprocessed_data[:,col] /= stdVal[col]
+
     return preprocessed_data
 
 
@@ -73,22 +76,39 @@ def modify_features(data):
 def gd_train(data, labels, lr):
     # Your code here:
     # Number of features = number of columns from pre-processed data - 1 : this is because data contains one column of label
-    NumFeat = np.shape(data)[1] - 1
+    numFeat = np.shape(data)[1] - 1
     # Number of training data = number of rows from pre-processed data \
-    NumTraning = np.shape(data)[0] 
+    numDataPoint = np.shape(data)[0] 
     # Initialize weights to all zero 
-    weights = np.zeros(NumFeat)
+    weights = np.zeros(numFeat)
     # this array stores the loss after each iteration
     losses = []
     #we are supposed to run 4000 iterations if the loss is not convereged 
     count = 4000
-    # this record loss for the current iteration
-    currLoss = 1
+    # this record loss gradient for the current iteration
+    currLossGrad = 10
     # termination conditions
-    while count > 0 and currLoss > 1:
+ 
+    while count > 0 and currLossGrad > 1:
         # TODO: calculate current loss and gradient
+        losses.append(loss(data, labels, weights))
+        currLossGrad = lossGrad(data, labels, weights, numDataPoint, numFeat)
+        weights -= lr * currLossGrad
         count -= 1
     return weights, losses
+
+def loss(data, labels, weights, numDataPoint):
+    MSE = 0
+    for index in range(numDataPoint):
+        MSE += np.square(np.dot(data[index], np.transpose(weights))[0] - labels[index])
+    return MSE/numDataPoint
+
+def lossGrad(data, labels, weights, numDataPoint, numFeat):
+    grad = np.zeros(numFeat)
+    for index in range(numDataPoint):
+        grad += (np.dot(data[index], np.transpose(weights))[0] - labels[index]) * data[index]
+    return (2/numDataPoint) * grad
+
 
 # Generates and saves plots of the training loss curves. Note that you can interpret losses as a matrix
 # containing the losses of multiple training runs and then put multiple loss curves in a single plot.
@@ -105,7 +125,7 @@ print(preprocess_data(load_data('IA1_train.csv'), 1, 0))
 
 # Part 1 . Implement batch gradient descent and experiment with different learning rates.
 # Your code here:
-
+#print(gd_train(preprocess_data(load_data('IA1_train.csv'), 1, 0), 1, 1))
 
 # Part 2 a. Training and experimenting with non-normalized data.
 # Your code here:
