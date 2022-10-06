@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 from numpy import linalg as LA
+import matplotlib.pyplot as plt
 
 
 
@@ -92,11 +93,15 @@ def gd_train(data, labels, lr):
     count = 4000
     # this record loss gradient for the current iteration
     currLossGrad = np.random.rand(numFeat)
+    lastLossGrad = np.random.rand(numFeat)
     # termination conditions
-    while count > 0 and LA.norm(currLossGrad) > 1e-5:
+    while count > 0 and LA.norm(currLossGrad) > 1e-5 and LA.norm(currLossGrad) < 10000:
         # TODO: calculate current loss and gradient
         losses.append(loss(data, labels, weights, numDataPoint))
         currLossGrad = lossGrad(data, labels, weights, numDataPoint, numFeat)
+        if abs(LA.norm(currLossGrad) - LA.norm(lastLossGrad)) < 0.001:
+            break
+        lastLossGrad = currLossGrad
         weights -= currLossGrad * lr
         count -= 1
         print(count)
@@ -125,8 +130,14 @@ def lossGrad(data, labels, weights, numDataPoint, numFeat):
 # containing the losses of multiple training runs and then put multiple loss curves in a single plot.
 def plot_losses(losses):
     # Your code here:
-
-    return
+    xAxis = np.arange(0, len(losses))
+    #asked by the assignment to plot y axis in log scale 
+    yAxis = losses
+    plt.plot(xAxis, yAxis)
+    plt.xlabel('iteration')
+    plt.ylabel('MSE')
+    plt.show()
+    return losses
 
 # Invoke the above functions to implement the required functionality for each part of the assignment.
 
@@ -136,12 +147,12 @@ preprocessed_data = preprocess_data(load_data('IA1_train.csv'), 1, 0)
 
 # Part 1 . Implement batch gradient descent and experiment with different learning rates.
 # Your code here:
-weights, losses = gd_train(preprocessed_data, 1, 0.001)
-print(losses)
+weights, losses = gd_train(preprocessed_data, 1, 0.0001)
+
 
 # Part 2 a. Training and experimenting with non-normalized data.
 # Your code here:
-
+plot_losses(losses)
 
 # Part 2 b Training with redundant feature removed. 
 # Your code here:
