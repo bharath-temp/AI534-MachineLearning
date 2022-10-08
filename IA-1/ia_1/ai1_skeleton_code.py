@@ -52,13 +52,19 @@ def preprocess_data(data, normalize, drop_sqrt_living15):
     # Calculate std value by col
     stdVal = np.std(preprocessed_data, dtype=np.float64, axis=0)
     if normalize == 1:
-
-        # Normalize each column by substracting to mean before diving by std
-        for col in range(23):
-            # Do not implement norm on waterfront, price, and constant 1
-            if col != 5 and col != 18 and col!= 22:
-                preprocessed_data[:,col] -= meanVal[col]
-                preprocessed_data[:,col] /= stdVal[col]
+        if drop_sqrt_living15 == 0:
+            # Normalize each column by substracting to mean before diving by std
+            for col in range(23):
+                # Do not implement norm on waterfront, price, and constant 1
+                if col != 5 and col != 18 and col!= 22:
+                    preprocessed_data[:,col] -= meanVal[col]
+                    preprocessed_data[:,col] /= stdVal[col]
+        else:
+            for col in range(22):
+                # Do not implement norm on waterfront, price, and constant 1
+                if col != 5 and col != 17 and col!= 21:
+                    preprocessed_data[:,col] -= meanVal[col]
+                    preprocessed_data[:,col] /= stdVal[col]           
 
     return preprocessed_data
 
@@ -95,7 +101,7 @@ def gd_train(data, labels, lr):
     currLossGrad = np.random.rand(numFeat)
     lastLossGrad = np.random.rand(numFeat)
     # termination conditions
-    while count > 0 and LA.norm(currLossGrad) > 1e-5 and LA.norm(currLossGrad) < 10000:
+    while count > 0 and LA.norm(currLossGrad) > 1e-5 and LA.norm(currLossGrad) < 1e20:
         # TODO: calculate current loss and gradient
         losses.append(loss(data, labels, weights, numDataPoint))
         currLossGrad = lossGrad(data, labels, weights, numDataPoint, numFeat)
@@ -136,23 +142,39 @@ def plot_losses(losses):
     plt.plot(xAxis, yAxis)
     plt.xlabel('iteration')
     plt.ylabel('MSE')
-    plt.show()
+    plt.savefig('RedundancyNormalized_1e_2.png')
+    plt.close() 
+    #plt.show()   
     return losses
+
 
 # Invoke the above functions to implement the required functionality for each part of the assignment.
 
 # Part 0  : Data preprocessing.
 # Your code here:
-preprocessed_data = preprocess_data(load_data('IA1_train.csv'), 1, 0)
+preprocessed_data = preprocess_data(load_data('IA1_train.csv'), 1, 1)
 
 # Part 1 . Implement batch gradient descent and experiment with different learning rates.
 # Your code here:
-weights, losses = gd_train(preprocessed_data, 1, 0.0001)
-
-
+weights, losses = gd_train(preprocessed_data, 1, 0.01)
+plot_losses(losses)
+testing_preprocessed_data = preprocess_data(load_data('IA1_dev.csv'), 1, 1)
+# separate labels from data
+testing_labels = testing_preprocessed_data[:, 18]
+testing_preprocessed_data = np.delete(testing_preprocessed_data, 18, 1)
+# Number of features = number of columns from pre-processed data 
+testing_numFeat = np.shape(testing_preprocessed_data)[1] 
+# Number of training data = number of rows from pre-processed data \
+testing_numDataPoint = np.shape(testing_preprocessed_data)[0]
+testing_MSE = loss(testing_preprocessed_data, testing_labels, weights, testing_numDataPoint)
+print(testing_MSE)
+print(weights)
+with open('RedundancyNormalized_1e_2.txt', 'w') as f:
+    f.write(str(testing_MSE))
+    f.write(str(weights))
 # Part 2 a. Training and experimenting with non-normalized data.
 # Your code here:
-plot_losses(losses)
+
 
 # Part 2 b Training with redundant feature removed. 
 # Your code here:
