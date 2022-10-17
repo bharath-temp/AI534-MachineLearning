@@ -32,7 +32,8 @@ def preprocess_data(data, normalize, drop_sqrt_living15):
     #print(df)
     #return preprocessed_data
     data[["month", "day", "year"]] = data["date"].str.split("/", expand=True)
-    data.drop(columns=['id', 'date'])
+    data = data.drop(columns=['id', 'date'])
+    print(data)
     return data
 
 # Implements the feature engineering required for part 4. Quite similar to preprocess_data.
