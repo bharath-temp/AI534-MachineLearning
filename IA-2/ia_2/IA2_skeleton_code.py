@@ -19,7 +19,7 @@ def preprocess_data(data):
 # Trains a logistic regression model with L2 regularization on the provided train_data, using the supplied lambd
 # weights should store the per-feature weights of the learned logisitic regression model. train_acc and val_acc 
 # should store the training and validation accuracy respectively. 
-def LR_L2_train(train_data, val_data, lambda):
+def LR_L2_train(train_data, val_data, lambda_val):
     # Your code here:
 
     return weights, train_acc, val_acc
@@ -27,7 +27,7 @@ def LR_L2_train(train_data, val_data, lambda):
 # Trains a logistic regression model with L1 regularization on the provided train_data, using the supplied lambd
 # weights should store the per-feature weights of the learned logisitic regression model. train_acc and val_acc 
 # should store the training and validation accuracy respectively. 
-def LR_L1_train(train_data, val_data, lambda):
+def LR_L1_train(train_data, val_data, lambda_val):
     # Your code here:
 
     return weights, train_acc, val_acc
