@@ -1,11 +1,16 @@
 # AI534
 # IA2 skeleton code
+# By: Bharath, Cheng, Bhargav
+
+import numpy as np
+import pandas as pd
+import matplotlib
 
 
 # Loads a data file from a provided file location.
 def load_data(path):
     # Your code here:
-    
+    loaded_data = pd.read_csv(path)
     return loaded_data
 
 # Implements dataset preprocessing. For this assignment, you just need to implement normalization 
@@ -13,6 +18,10 @@ def load_data(path):
 
 def preprocess_data(data):
     # Your code here:
+    data['Age'] = (data['Age'] - data['Age'].min()) / (data['Age'].max() - data['Age'].min())
+    data['Annual_Premium'] = (data['Annual_Premium'] - data['Annual_Premium'].min()) / (data['Annual_Premium'].max() - data['Annual_Premium'].min())
+    data['Vintage'] = (data['Vintage'] - data['Vintage'].min()) / (data['Vintage'].max() - data['Vintage'].min())
+    preprocessed_data = data.to_numpy()
 
     return preprocessed_data
 
@@ -54,6 +63,13 @@ def plot_losses(accs):
 
 # Part 3  Implement logistic regression with L1 regularization and experiment with different lambdas
 # Your code here:
+
+
+
+loaded_data = load_data("IA2-train.csv")
+pre_proc_data = preprocess_data(loaded_data)
+
+
 
 
 
