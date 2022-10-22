@@ -54,6 +54,7 @@ def LR_L2_train(train_data, val_data, lambda_val):
         #invoke a helper function to calculate loss gradient: both normal gradient descent + regularization are included in the helper function
         currLossGrad = L2_loss_grad(train_data, train_labels, weights, numDataPoint, numFeat, lambda_val)
         # if the gradient of loss does not change much, consider it converged
+
         if abs(LA.norm(currLossGrad) - LA.norm(lastLossGrad)) < 0.001:
             break
         lastLossGrad = currLossGrad
@@ -62,6 +63,7 @@ def LR_L2_train(train_data, val_data, lambda_val):
         #print(count)
     #plt_loss(losses)
     prediction_training = np.dot(train_data, weights)
+    
     # invoke another helper function for calculating accuracy
     train_acc = accuracy(prediction_training, train_labels)
     prediction_val = np.dot(val_data , weights)
@@ -88,6 +90,7 @@ def L2_loss(data, labels, weights, numDataPoint, numFeat, lambda_val):
     #normal gradient descent
     for index in range(numDataPoint):
         loss -= (labels[index] * np.log(logi(data[index], weights)) + (1-labels[index]) * np.log(1 - logi(data[index], weights)))
+
     loss /= numDataPoint
     #L2 regularization
     for feat in range(numFeat):
@@ -182,6 +185,18 @@ def plt_loss(losses):
     #plt.show()   
     return losses
 
+def plt_loss(losses):
+    xAxis = np.arange(0, len(losses))
+    #asked by the assignment to plot y axis in log scale 
+    yAxis = losses
+    plt.plot(xAxis, yAxis)
+    plt.xlabel('iteration')
+    plt.ylabel('Loss')
+    plt.savefig('lr1e_1lambda1e_1.png')
+    plt.close() 
+    #plt.show()   
+    return losses
+
 # Invoke the above functions to implement the required functionality for each part of the assignment.
 # Part 0  : Data preprocessing.
 # Your code here:
@@ -223,6 +238,7 @@ print(train_output, val_output)
 x = np.arange(len(lambda_array))
 width = 0.35
 
+
 fig, ax = plt.subplots()
 train1 = ax.bar(x - width/2, train_output, width, label = 'Training Accuracy')
 val1 = ax.bar(x + width/2, val_output, width, label = 'Validation Accuracy')
@@ -254,6 +270,3 @@ plt.close()
 #L1_trained_weights, L1_trained_acc, L1_valed_acc = LR_L1_train(pre_proc_train_data, pre_proc_val_data, 0.01)
 #print(L1_trained_acc, L1_valed_acc)
 # Your code here:
-
-
-
