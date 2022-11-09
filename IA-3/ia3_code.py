@@ -3,10 +3,9 @@ import pandas as pd
 from heapq import nlargest
 import matplotlib.pyplot as plt
 
+from sklearn import svm
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn import svm
-from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report
 
@@ -53,7 +52,7 @@ class Processing:
             self.sentiment_list = self.loaded_data[column].tolist()
 
     def feature_extraction_count(self):
-        self.count_vectorizer = CountVectorizer()
+        self.count_vectorizer = CountVectorizer(lowercase=True)
         self.count_vectorizer.fit(self.text_list)
         self.bag_of_words = self.count_vectorizer.fit_transform(self.text_list)
         self.encoded_bag_of_words = self.bag_of_words.toarray()
@@ -67,7 +66,7 @@ class Processing:
         return self.freq_words
 
     def feature_extraction_tfidf(self):
-        self.tfidf_vectorizer = TfidfVectorizer()
+        self.tfidf_vectorizer = TfidfVectorizer(use_idf=True, lowercase=True)
         self.tfidf_vectorizer.fit(self.text_list)
         self.bag_of_words = self.tfidf_vectorizer.fit_transform(self.text_list)
         self.encoded_bag_of_words = self.bag_of_words.toarray()
@@ -81,13 +80,13 @@ class Processing:
         return self.freq_words
 
     def linear_svm(self):
-        svm = LinearSVC()
-        svm.fit(self.bag_of_words, self.label_data)
+        clf = svm.SVC(kernel='linear', C = 1.0)
+        clf.fit(self.bag_of_words, self.label_data)
         # Obtain accuracy on the train set
-        y_hat = svm.predict(self.encoded_bag_of_words)
+        y_hat = clf.predict(self.encoded_bag_of_words)
         acc = accuracy_score(y_hat, self.label_data)
         print(f"Accuracy on the train set: {acc:.4f}")
-        return svm
+        return clf
 
 
 
@@ -129,32 +128,23 @@ def main():
     train_processor.column_to_list("text")
     train_processor.column_to_list("sentiment")
     train_processor.feature_extraction_tfidf()
-    mysvm = train_processor.linear_svm()
+    clf = train_processor.linear_svm()
 
     test_processor = Processing("IA3-dev.csv")
     test_processor.load_data()
     test_processor.column_to_list("text")
     test_processor.column_to_list("sentiment")
-    test_processor.feature_extraction_tfidf()
 
-    y_test_hat = mysvm.predict(test_processor.encoded_bag_of_words)
-    acc = accuracy_score(y_test_hat, test_processor.sentiment_list)
+    trained_tfidf_vectorizer = train_processor.tfidf_vectorizer
+    x_test = trained_tfidf_vectorizer.transform(test_processor.text_list)
+    
+    y_predict = clf.predict(x_test)
+
+    acc = accuracy_score(y_predict, test_processor.label_data)
     print(f"Accuracy on the test set: {acc:.4f}")
+    print(classification_report(test_processor.label_data, y_predict))
 
-    """
-    classifier_linear = svm.SVC(kernel='linear')
-    classifier_linear.fit(train_processor.bag_of_words, train_processor.label_data)
 
-    prediction_linear = classifier_linear.predict(test_processor.bag_of_words)
-
-    report = classification_report(test_processor.label_data, prediction_linear, output_dict=True)
-    print('positive: ', report[1])
-    print('negative: ', report[0])
-
-    #print(processor.sentiment_list)
-
-    #print(processor.encoded_bag_of_words)
-    """
 
 
 
