@@ -15,6 +15,9 @@ new_line = '\n'
 
 categories = ["positive", "negative"]
 
+c_values = [-4, -3, -2, -1, 0, 1, 2, 3, 4]
+gamma_values = [-5, -4, -3, -2, -1, 0, 1]
+
 class Sentiment(Enum):
     POS = 1
     NEG = 0
@@ -79,13 +82,52 @@ class Processing:
 
         return self.freq_words
 
-    def linear_svm(self):
-        clf = svm.SVC(kernel='linear', C = 1.0)
+    def linear_svm(self, c_val=1.0):
+        clf = svm.SVC(kernel='poly', C = c_val)
         clf.fit(self.bag_of_words, self.label_data)
         # Obtain accuracy on the train set
         y_hat = clf.predict(self.encoded_bag_of_words)
         acc = accuracy_score(y_hat, self.label_data)
-        print(f"Accuracy on the train set: {acc:.4f}")
+        #print(f"Accuracy on the train set: {acc:.4f}")
+        return clf
+
+
+class Classification:
+
+    bag_of_words = None
+    encoded_bag_of_words = None
+    label_data = None
+
+    def __init__(self, bag_of_words, encoded_bag_of_words, label_data):
+        self.bag_of_words = bag_of_words
+        self.label_data = label_data
+        self.encoded_bag_of_words = encoded_bag_of_words 
+
+    def linear_svm(self, c_val=1.0):
+        clf = svm.SVC(kernel='linear', C = c_val)
+        clf.fit(self.bag_of_words, self.label_data)
+        # Obtain accuracy on the train set
+        y_hat = clf.predict(self.encoded_bag_of_words)
+        acc = accuracy_score(y_hat, self.label_data)
+        print(f"Accuracy on the train set (linear_svm): {acc:.4f}")
+        return clf
+
+    def quadratic_svm(self, c_val=1.0):
+        clf = svm.SVC(kernel='poly', C = c_val)
+        clf.fit(self.bag_of_words, self.label_data)
+        # Obtain accuracy on the train set
+        y_hat = clf.predict(self.encoded_bag_of_words)
+        acc = accuracy_score(y_hat, self.label_data)
+        print(f"Accuracy on the train set (quadratic_svm): {acc:.4f}")
+        return clf
+
+    def rbf_svm(self, c_val=1.0, gamma_val='scale'):
+        clf = svm.SVC(kernel='rbf', C = c_val, gamma = gamma_val)
+        clf.fit(self.bag_of_words, self.label_data)
+        # Obtain accuracy on the train set
+        y_hat = clf.predict(self.encoded_bag_of_words)
+        acc = accuracy_score(y_hat, self.label_data)
+        print(f"Accuracy on the train set (rbf_svm): {acc:.4f}")
         return clf
 
 
@@ -93,6 +135,11 @@ class Processing:
 def main():
 
     """
+    # This section of code pre-processes our data and completes
+    # section 0.a of the assignment which is to check the top
+    # ten most frequent words with the respectice vectorizer.
+    #
+    #
     pos_processor = Processing("IA3-train.csv", "POS")
     pos_processor.load_data()
     pos_processor.column_to_list("text")
@@ -128,7 +175,6 @@ def main():
     train_processor.column_to_list("text")
     train_processor.column_to_list("sentiment")
     train_processor.feature_extraction_tfidf()
-    clf = train_processor.linear_svm()
 
     test_processor = Processing("IA3-dev.csv")
     test_processor.load_data()
@@ -137,14 +183,30 @@ def main():
 
     trained_tfidf_vectorizer = train_processor.tfidf_vectorizer
     x_test = trained_tfidf_vectorizer.transform(test_processor.text_list)
-    
-    y_predict = clf.predict(x_test)
 
-    acc = accuracy_score(y_predict, test_processor.label_data)
-    print(f"Accuracy on the test set: {acc:.4f}")
-    print(classification_report(test_processor.label_data, y_predict))
+    trained_classifier = Classification(train_processor.bag_of_words, train_processor.encoded_bag_of_words, train_processor.label_data)
 
+    """
+    for val in c_values:
+        linear_clf = trained_classifier.linear_svm(pow(10, val))
+        quadratic_clf = trained_classifier.quadratic_svm(pow(10, val))
+        ylinear_predict = linear_clf.predict(x_test)
+        yquadratic_predict = quadratic_clf.predict(x_test)
+        acc_linear = accuracy_score(ylinear_predict, test_processor.label_data)
+        acc_quadratic = accuracy_score(yquadratic_predict, test_processor.label_data)
+        print(f"Accuracy on the linear-svm test set with C value 10^{val}: {acc_linear:.4f}")
+        print(f"Accuracy on the quadratic-svm test set with C value 10^{val}: {acc_quadratic:.4f}")
+        print(f"{new_line}")
+        #print(classification_report(test_processor.label_data, y_predict))
+    """
 
+    for val in c_values:
+        for gamma in gamma_values:
+            rbf_clf = trained_classifier.rbf_svm(pow(10, val), pow(10, gamma))
+            yrbf_predict = rbf_clf.predict(x_test)
+            acc_rbf = accuracy_score(yrbf_predict, test_processor.label_data)
+            print(f"Accuracy on the rbf-svm test set with C value 10^{val} and gamma value {gamma}: {acc_rbf:.4f}")
+            print(f"{new_line}")
 
 
 
